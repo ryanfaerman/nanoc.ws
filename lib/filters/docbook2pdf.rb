@@ -49,6 +49,8 @@ module DocBook2PDF
 
     attr_reader :chapters
     attr_reader :sections
+    attr_reader :current_chapter
+    attr_reader :current_figure
 
     def initialize
       @current_chapter = 1
@@ -56,6 +58,8 @@ module DocBook2PDF
 
       @current_section = 1
       @sections = []
+
+      @current_figure = 1
     end
 
     def add_chapter(title, page)
@@ -64,11 +68,17 @@ module DocBook2PDF
 
       @sections << [ page, nil,   @current_section ]
       @current_section += 1
+
+      @current_figure = 1
     end
 
     def add_section(title, page)
       @sections << [ page, title, @current_section ]
       @current_section = 1
+    end
+
+    def add_figure
+      @current_figure = 1
     end
 
   end
@@ -350,10 +360,11 @@ module DocBook2PDF
       @pdf.indent(30, 30) do
         # FIXME do not prepend content/
         @pdf.image('static' + href, width: @pdf.bounds.width)
-        @pdf.formatted_text([
-          { text: 'Figure: ', styles: [ :bold ],   font: 'PT Sans' },
-          { text: text,       styles: [ :italic ], font: 'Gentium Basic' }
-          ])
+        @pdf.formatted_text([{
+          text: "Figure #{@state.current_chapter}.#{@state.current_figure}: #{text}",
+          styles: [ :italic ],
+          font: 'Gentium Basic'
+        }])
         @pdf.move_down 10
       end
     end
