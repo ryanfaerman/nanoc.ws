@@ -1,19 +1,24 @@
-:source-highlighter: coderay
-:icons: font
-:doctype: book
-:toc: right
-:sectanchors:
-:idprefix:
-:numbered:
+---
+items:
+  - /about/
+  - /docs/tutorial/
+---
 
-= The nanoc Book
-Denis Defreyne <denis.defreyne@stoneship.org>
-v1.0
-
-== <%= @items['/about/'][:title] %>
-
-<%= asciidoctor_demote_headers(@items['/about/'].raw_content) %>
-
-== <%= @items['/docs/tutorial/'][:title] %>
-
-<%= asciidoctor_demote_headers(@items['/docs/tutorial/'].raw_content) %>
+<?xml version="1.0" encoding="UTF-8"?>
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0" lang="en">
+	<info>
+		<date>v1.0</date>
+		<author>
+			<personname>
+				<firstname>Denis</firstname>
+				<surname>Defreyne</surname>
+			</personname>
+		</author>
+	</info>
+<% @item[:items].each do |i| %>
+	<chapter>
+		<title>About nanoc</title>
+		<%= @items[i].compiled_content(rep: :docbook) %>
+	</chapter>
+<% end %>
+</book>

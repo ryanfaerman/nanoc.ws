@@ -46,9 +46,18 @@ end
 
 # book
 
+compile '*', rep: :docbook do
+  if item[:extension] == 'adoc'
+    filter :asciidoctor_preview, backend: 'docbook5'
+  end
+end
+
+route '*', rep: :docbook do
+  nil
+end
+
 compile '/book/' do
   filter :erb
-  filter :asciidoctor_preview, backend: 'docbook5', header_footer: true
   filter :docbook2pdf
 end
 
