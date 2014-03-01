@@ -17,7 +17,7 @@ items:
 	</info>
 <% @item[:items].each do |i| %>
 	<chapter>
-		<title>About nanoc</title>
+		<title><%=h @items[i][:title] %></title>
 		<%= @items[i].compiled_content(rep: :docbook) %>
 	</chapter>
 <% end %>
