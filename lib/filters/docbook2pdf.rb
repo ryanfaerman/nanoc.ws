@@ -349,7 +349,7 @@ module DocBook2PDF
 
       @pdf.indent(30, 30) do
         # FIXME do not prepend content/
-        @pdf.image('static/' + href, width: @pdf.bounds.width)
+        @pdf.image('static' + href, width: @pdf.bounds.width)
         @pdf.formatted_text([
           { text: 'Figure: ', styles: [ :bold ],   font: 'PT Sans' },
           { text: text,       styles: [ :italic ], font: 'Gentium Basic' }

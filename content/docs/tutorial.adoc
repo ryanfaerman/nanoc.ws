@@ -109,7 +109,7 @@ tutorial% *nanoc view*
 Now, open your web browser and navigate to link:http://localhost:3000/[http://localhost:3000/]. What you’ll see is something like this:
 
 .Screenshot of what a brand new nanoc site looks like
-image::assets/images/tutorial/default-site.png[Screenshot of what a brand new nanoc site looks like,role="thumb"]
+image::/assets/images/tutorial/default-site.png[Screenshot of what a brand new nanoc site looks like,role="thumb"]
 
 (If you open the `index.html` directly in your web browser, the stylesheet will most likely not be loaded. This is because the page has an _absolute_ link to the `style.css` file, not a relative one.)
 
