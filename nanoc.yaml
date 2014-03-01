@@ -1,3 +1,5 @@
+text_extensions: [ 'md', 'adoc', 'html', 'erb', 'scss' ]
+
 enable_output_diff: true
 
 prune:

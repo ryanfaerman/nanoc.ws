@@ -1,0 +1,19 @@
+:source-highlighter: coderay
+:icons: font
+:doctype: book
+:toc: right
+:sectanchors:
+:idprefix:
+:numbered:
+
+= The nanoc Book
+Denis Defreyne <denis.defreyne@stoneship.org>
+v1.0
+
+== <%= @items['/about/'][:title] %>
+
+<%= asciidoctor_demote_headers(@items['/about/'].raw_content) %>
+
+== <%= @items['/docs/tutorial/'][:title] %>
+
+<%= asciidoctor_demote_headers(@items['/docs/tutorial/'].raw_content) %>

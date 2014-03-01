@@ -59,6 +59,14 @@ h2 code {
     font-size: inherit;
 }
 
+body {
+    counter-reset: section-header 0;
+}
+
+h2 {
+    counter-reset: subsection-header 0;
+}
+
 kbd {
     font-weight: bold;
 }
@@ -141,7 +149,7 @@ table.dl {
     }
 }
 
-figure {
+figure, .imageblock {
     img {
         display: block;
 
@@ -151,7 +159,7 @@ figure {
         border-style: solid;
     }
 
-    figcaption {
+    figcaption, .title {
         padding: 5px 10px;
         margin: 0 0 20px 0;
 
@@ -357,17 +365,18 @@ body.page .content {
                 margin-right: 5px
             }
 
-            .section {
+            .section, .sect1, .sect2, .sect3 {
                 margin-bottom: 40px;
             }
 
             h2 {
                 font-size: 20px;
                 font-weight: normal;
+                margin-top: 40px;
             }
 
-            * + h2 {
-                margin-top: 40px;
+            h2:first-child {
+                margin-top: 0;
             }
 
             h3 {
@@ -378,6 +387,16 @@ body.page .content {
                 text-transform: uppercase;
 
                 margin-top: 40px;
+            }
+
+            h2:before{
+                counter-increment: section-header;
+                content: counter(section-header) ". ";
+            }
+
+            h3:before{
+                counter-increment: subsection-header;
+                content: counter(section-header) "." counter(subsection-header) ". ";
             }
 
             .donate {

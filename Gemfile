@@ -15,3 +15,5 @@ gem 'rubypants'   # for pretty typography
 gem 'susy'        # for nice grids
 gem 'systemu'     # for invoking rsync etc
 gem 'yard'        # for loading filter and helper docs
+gem 'prawn'
+gem 'asciidoctor', '1.5.0.preview.2'

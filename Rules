@@ -44,6 +44,18 @@ route '/assets/style/*/' do
   '/assets/style' + '-v' + rep.item[:version].to_s + '.css'
 end
 
+# book
+
+compile '/book/' do
+  filter :erb
+  filter :asciidoctor_preview, backend: 'docbook5', header_footer: true
+  filter :docbook2pdf
+end
+
+route '/book/' do
+  '/nanoc.pdf'
+end
+
 # other
 
 compile '/sitemap/' do
@@ -68,8 +80,11 @@ compile '*' do
   end
 
   filter :erb if item[:is_dynamic]
-  if 'md' == item[:extension]
+  case item[:extension]
+  when 'md'
     filter :kramdown, :auto_ids => false
+  when 'adoc'
+    filter :asciidoctor_preview
   end
   filter :remove_spacing_around_pre
   filter :add_ids_to_headers
