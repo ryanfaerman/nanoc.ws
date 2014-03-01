@@ -47,12 +47,15 @@ module DocBook2PDF
 
   class State
 
+    attr_accessor :move_down
     attr_reader :chapters
     attr_reader :sections
     attr_reader :current_chapter
     attr_reader :current_figure
 
     def initialize
+      @move_down = 0
+
       @current_chapter = 1
       @chapters = []
 
@@ -93,6 +96,15 @@ module DocBook2PDF
 
     def process
       raise 'abstract'
+    end
+
+    def handle_top_margin(x)
+      @pdf.move_down([ x, @state.move_down ].max)
+      @state.move_down = 0
+    end
+
+    def handle_bottom_margin(x)
+      @state.move_down = x
     end
 
     def notify_unhandled(node)
@@ -210,6 +222,8 @@ module DocBook2PDF
   class ChapterTitleRenderer < NodeRenderer
 
     def process
+      handle_top_margin(0)
+
       text = @node.children.find { |e| e.text? }
 
       @pdf.bounding_box([0, @pdf.bounds.height - 50], width: @pdf.bounds.width) do
@@ -217,8 +231,9 @@ module DocBook2PDF
           @pdf.text text.text, align: :right
         end
       end
-      @pdf.move_down(100)
       @state.add_chapter(text.text, @pdf.page_number)
+
+      handle_bottom_margin(100)
     end
 
   end
@@ -255,7 +270,7 @@ module DocBook2PDF
         end
       end
 
-      @pdf.move_down(20)
+      handle_bottom_margin(20)
     end
 
     def indent
@@ -271,12 +286,14 @@ module DocBook2PDF
   class SectionTitleRenderer < NodeRenderer
 
     def process
+      handle_top_margin(30)
+
       text = @node.children.find { |e| e.text? }
 
       @pdf.indent(indent, indent) do
         @pdf.formatted_text [ { text: text.text, font: 'PT Sans', styles: [ :bold ], size: font_size } ]
       end
-      @pdf.move_down(10)
+      handle_bottom_margin(10)
       @state.add_section(text.text, @pdf.page_number)
     end
 
@@ -347,6 +364,8 @@ module DocBook2PDF
   class FigureRenderer < NodeRenderer
 
     def process
+      handle_top_margin(10)
+
       # Title
       title = @node.children.find { |e| e.name == 'title' }
       text = title.children.find { |e| e.text? }.text
@@ -365,8 +384,9 @@ module DocBook2PDF
           styles: [ :italic ],
           font: 'Gentium Basic'
         }])
-        @pdf.move_down 10
       end
+
+      handle_bottom_margin(10)
     end
 
   end
@@ -374,6 +394,8 @@ module DocBook2PDF
   class SimparaRenderer < NodeRenderer
 
     def process
+      handle_top_margin(10)
+
       text = @node.children.find { |e| e.text? }
 
       res = @node.children.map do |node|
@@ -401,7 +423,8 @@ module DocBook2PDF
       end
 
       @pdf.formatted_text(res)
-      @pdf.move_down(10)
+
+      handle_bottom_margin(10)
     end
 
   end
@@ -409,6 +432,8 @@ module DocBook2PDF
   class ScreenRenderer < NodeRenderer
 
     def process
+      handle_top_margin(10)
+
       @pdf.indent(20, 20) do
         res = @node.children.map do |node|
           if node.text?
@@ -437,8 +462,9 @@ module DocBook2PDF
         @pdf.font('Cousine', size: 10) do
           @pdf.formatted_text(res)
         end
-        @pdf.move_down(10)
       end
+
+      handle_bottom_margin(10)
     end
 
   end
@@ -446,6 +472,8 @@ module DocBook2PDF
   class ProgramListingRenderer < NodeRenderer
 
     def process
+      handle_top_margin(10)
+
       @pdf.indent(20, 20) do
         res = @node.children.map do |node|
           if node.text?
@@ -474,8 +502,9 @@ module DocBook2PDF
         @pdf.font('Cousine', size: 10) do
           @pdf.formatted_text(res)
         end
-        @pdf.move_down(10)
       end
+
+      handle_bottom_margin(10)
     end
 
   end
