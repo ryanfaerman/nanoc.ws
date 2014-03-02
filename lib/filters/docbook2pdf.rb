@@ -107,34 +107,42 @@ module DocBook2PDF
       @state.move_down = x
     end
 
+    def temp_doc
+      @tmp_doc ||= begin
+        tmp = ::Prawn::Document.new
+
+        tmp.font_families.update("PT Sans" => {
+          normal:      "fonts/PT-Sans/PTS55F.ttf",
+          italic:      "fonts/PT-Sans/PTS56F.ttf",
+          bold:        "fonts/PT-Sans/PTS75F.ttf",
+          bold_italic: "fonts/PT-Sans/PTS76F.ttf",
+        })
+        tmp.font_families.update("Gentium Basic" => {
+          normal:      "fonts/GentiumBasic_1102/GenBasR.ttf",
+          italic:      "fonts/GentiumBasic_1102/GenBasI.ttf",
+          bold:        "fonts/GentiumBasic_1102/GenBasB.ttf",
+          bold_italic: "fonts/GentiumBasic_1102/GenBasBI.ttf",
+        })
+        tmp.font_families.update("Cousine" => {
+          normal:      "fonts/cousine/Cousine-Regular.ttf",
+          italic:      "fonts/cousine/Cousine-Italic.ttf",
+          bold:        "fonts/cousine/Cousine-Bold.ttf",
+          bold_italic: "fonts/cousine/Cousine-BoldItalic.ttf",
+        })
+
+        tmp.font 'Gentium Basic'
+        tmp.font_size 12
+        tmp.default_leading 2
+
+        tmp
+      end
+    end
+
     def estimate_height
       @pdf.bounds.absolute_top
 
-      $tmpid ||= 1
-      tmp = ::Prawn::Document.new
-
-      tmp.font_families.update("PT Sans" => {
-        normal:      "fonts/PT-Sans/PTS55F.ttf",
-        italic:      "fonts/PT-Sans/PTS56F.ttf",
-        bold:        "fonts/PT-Sans/PTS75F.ttf",
-        bold_italic: "fonts/PT-Sans/PTS76F.ttf",
-      })
-      tmp.font_families.update("Gentium Basic" => {
-        normal:      "fonts/GentiumBasic_1102/GenBasR.ttf",
-        italic:      "fonts/GentiumBasic_1102/GenBasI.ttf",
-        bold:        "fonts/GentiumBasic_1102/GenBasB.ttf",
-        bold_italic: "fonts/GentiumBasic_1102/GenBasBI.ttf",
-      })
-      tmp.font_families.update("Cousine" => {
-        normal:      "fonts/cousine/Cousine-Regular.ttf",
-        italic:      "fonts/cousine/Cousine-Italic.ttf",
-        bold:        "fonts/cousine/Cousine-Bold.ttf",
-        bold_italic: "fonts/cousine/Cousine-BoldItalic.ttf",
-      })
-
-      tmp.font 'Gentium Basic'
-      tmp.font_size 12
-      tmp.default_leading 2
+      tmp = temp_doc
+      tmp.start_new_page
 
       before, after = 0
       tmp.bounding_box([0, @pdf.bounds.absolute_top], width: @pdf.bounds.width, height: @pdf.bounds.height) do
@@ -143,7 +151,6 @@ module DocBook2PDF
         after = tmp.cursor
       end
       tmp.render_file "tmp#{$tmpid}.pdf"
-      $tmpid += 1
       - (after - before)
     end
 
