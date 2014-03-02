@@ -11,6 +11,14 @@ module DocBook2PDF
     type :text => :binary
 
     def run(content, params={})
+      Converter.new.run(content, output_filename)
+    end
+
+  end
+
+  class Converter
+
+    def run(content, output_filename)
       doc = Nokogiri::XML.parse(content)
 
       Prawn::Document.generate(output_filename) do |pdf|
@@ -150,7 +158,6 @@ module DocBook2PDF
         yield tmp
         after = tmp.cursor
       end
-      tmp.render_file "tmp#{$tmpid}.pdf"
       - (after - before)
     end
 
@@ -306,6 +313,8 @@ module DocBook2PDF
           SubsectionRenderer
         when 'figure'
           FigureRenderer
+        when 'variablelist'
+          VariableListRenderer
         end
 
         if klass
@@ -390,6 +399,8 @@ module DocBook2PDF
 
     def process
       @node.children.each do |node|
+        next if node.text?
+
         klass = case node.name
         when 'simpara'
           SimparaRenderer
@@ -441,7 +452,7 @@ module DocBook2PDF
   class SimparaRenderer < NodeRenderer
 
     def process
-      handle_top_margin(10)
+      handle_top_margin(0)
 
       text = @node.children.find { |e| e.text? }
 
@@ -457,6 +468,8 @@ module DocBook2PDF
           LiteralRenderer
         when 'ulink'
           UlinkRenderer
+        when 'link'
+          LinkRenderer
         when 'xref'
           XrefRenderer
         end
@@ -565,6 +578,117 @@ module DocBook2PDF
 
   end
 
+  class VariableListRenderer < NodeRenderer
+
+    def process
+      handle_top_margin(10)
+
+      @node.children.map do |node|
+        klass = case node.name
+        when 'varlistentry'
+          VariableListEntryRenderer
+        end
+
+        if klass
+          klass.new(node, @pdf, @state).process
+        else
+          notify_unhandled(node)
+        end
+      end
+
+      handle_bottom_margin(10)
+    end
+
+  end
+
+  class VariableListEntryRenderer < NodeRenderer
+
+    def process
+      handle_top_margin(0)
+
+      @node.children.map do |node|
+        klass = case node.name
+        when 'term'
+          VariableListEntryTermRenderer
+        when 'listitem'
+          VariableListEntryListItemRenderer
+        end
+
+        if klass
+          klass.new(node, @pdf, @state).process
+        else
+          notify_unhandled(node)
+        end
+      end
+
+      handle_bottom_margin(10)
+    end
+
+  end
+
+  class VariableListEntryTermRenderer < NodeRenderer
+
+    def process
+      handle_top_margin(0)
+
+      res = @node.children.map do |node|
+        if node.text?
+          next { text: node.text.gsub(' ', Prawn::Text::NBSP) }
+        end
+
+        klass = case node.name
+        when 'emphasis'
+          EmphasisRenderer
+        when 'literal'
+          LiteralRenderer
+        when 'ulink'
+          UlinkRenderer
+        when 'xref'
+          XrefRenderer
+        end
+
+        if klass
+          klass.new(node, @pdf, @state).process
+        else
+          notify_unhandled(node)
+          {text: ''}
+        end
+      end
+
+      @pdf.formatted_text(res)
+
+      handle_bottom_margin(0)
+    end
+
+  end
+
+  class VariableListEntryListItemRenderer < NodeRenderer
+
+    def process
+      handle_top_margin(0)
+
+      @pdf.indent(20, 20) do
+        @node.children.map do |node|
+          next if node.text?
+
+          klass = case node.name
+          when 'simpara'
+            SimparaRenderer
+          end
+
+          if klass
+            klass.new(node, @pdf, @state).process
+          else
+            notify_unhandled(node)
+          end
+        end
+      end
+
+      handle_bottom_margin(0)
+    end
+
+  end
+
   class EmphasisRenderer < NodeRenderer
 
     def process
@@ -584,8 +708,24 @@ module DocBook2PDF
   class UlinkRenderer < NodeRenderer
 
     def process
+      # FIXME handle all children
+
       target = @node[:url]
       text   = @node.children.find { |e| e.text? }.text
+
+      { text: text, link: target }
+    end
+
+  end
+
+  class LinkRenderer < NodeRenderer
+
+    def process
+      # FIXME handle all children
+      # FIXME localhost at localhost
+
+      target = @node['xlink:href']
+      text   = @node.children.find { |e| e.text? }.text + ' at ' + target
 
       { text: text, link: target }
     end

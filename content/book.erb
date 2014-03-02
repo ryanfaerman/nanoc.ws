@@ -18,7 +18,7 @@ items:
 <% @item[:items].each do |i| %>
 	<chapter>
 		<title><%=h @items[i][:title] %></title>
-		<%= @items[i].compiled_content(rep: :docbook) %>
+		<%= @items[i].compiled_content(rep: :docbook_partial) %>
 	</chapter>
 <% end %>
 </book>

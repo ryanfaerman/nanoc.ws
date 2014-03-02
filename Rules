@@ -46,14 +46,22 @@ end
 
 # book
 
-compile '*', rep: :docbook do
+compile '*', rep: :docbook_partial do
   if item[:extension] == 'adoc'
     filter :asciidoctor_preview, backend: 'docbook5'
   end
 end
 
-route '*', rep: :docbook do
+route '*', rep: :docbook_partial do
   nil
+end
+
+compile '/book/', rep: :docbook do
+  filter :erb
+end
+
+route '/book/', rep: :docbook do
+  '/nanoc-book.xml'
 end
 
 compile '/book/' do
@@ -62,7 +70,7 @@ compile '/book/' do
 end
 
 route '/book/' do
-  '/nanoc.pdf'
+  '/nanoc-book.pdf'
 end
 
 # other
