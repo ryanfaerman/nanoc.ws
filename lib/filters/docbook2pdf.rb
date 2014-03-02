@@ -107,6 +107,46 @@ module DocBook2PDF
       @state.move_down = x
     end
 
+    def estimate_height
+      @pdf.bounds.absolute_top
+
+      $tmpid ||= 1
+      tmp = ::Prawn::Document.new
+
+      tmp.font_families.update("PT Sans" => {
+        normal:      "fonts/PT-Sans/PTS55F.ttf",
+        italic:      "fonts/PT-Sans/PTS56F.ttf",
+        bold:        "fonts/PT-Sans/PTS75F.ttf",
+        bold_italic: "fonts/PT-Sans/PTS76F.ttf",
+      })
+      tmp.font_families.update("Gentium Basic" => {
+        normal:      "fonts/GentiumBasic_1102/GenBasR.ttf",
+        italic:      "fonts/GentiumBasic_1102/GenBasI.ttf",
+        bold:        "fonts/GentiumBasic_1102/GenBasB.ttf",
+        bold_italic: "fonts/GentiumBasic_1102/GenBasBI.ttf",
+      })
+      tmp.font_families.update("Cousine" => {
+        normal:      "fonts/cousine/Cousine-Regular.ttf",
+        italic:      "fonts/cousine/Cousine-Italic.ttf",
+        bold:        "fonts/cousine/Cousine-Bold.ttf",
+        bold_italic: "fonts/cousine/Cousine-BoldItalic.ttf",
+      })
+
+      tmp.font 'Gentium Basic'
+      tmp.font_size 12
+      tmp.default_leading 2
+
+      before, after = 0
+      tmp.bounding_box([0, @pdf.bounds.absolute_top], width: @pdf.bounds.width, height: @pdf.bounds.height) do
+        before = tmp.cursor
+        yield tmp
+        after = tmp.cursor
+      end
+      tmp.render_file "tmp#{$tmpid}.pdf"
+      $tmpid += 1
+      - (after - before)
+    end
+
     def notify_unhandled(node)
       puts "*** #{self.class.to_s}: unhandled element: #{node.name}"
     end
@@ -422,6 +462,15 @@ module DocBook2PDF
         end
       end
 
+      height = estimate_height do |pdf|
+        pdf.formatted_text(res)
+      end
+      p({ height: height, cursor: @pdf.cursor, bottom: @pdf.bounds.bottom }).inspect
+      if @pdf.cursor - height < 0
+        puts "starting new page"
+        p res
+        @pdf.start_new_page
+      end
       @pdf.formatted_text(res)
 
       handle_bottom_margin(10)
