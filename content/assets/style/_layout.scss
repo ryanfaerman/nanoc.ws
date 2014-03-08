@@ -86,13 +86,19 @@ pre {
     word-wrap: break-word;
 }
 
-div.admonition {
+div.admonition,
+div.admonitionblock {
     position: relative;
     padding: 10px 10px 10px 45px;
     margin: 0 0 20px 0;
 }
 
-div.admonition:before {
+div.admonitionblock td.icon {
+    display: none;
+}
+
+div.admonition:before,
+div.admonitionblock:before {
     position: absolute;
 
     font-family: Entypo;
@@ -103,11 +109,13 @@ div.admonition:before {
     left: 10px;
 }
 
-div.admonition.note:before {
+div.admonition.note:before,
+div.admonitionblock.note:before {
     content: "\E705";
 }
 
-div.admonition.caution:before {
+div.admonition.caution:before,
+div.admonitionblock.caution:before {
     content: "\1F4A5";
 }
 
